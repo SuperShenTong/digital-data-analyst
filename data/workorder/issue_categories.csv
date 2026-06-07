@@ -1,0 +1,11 @@
+﻿category_id,category_name,category_group,average_resolution_hours,escalation_threshold_hours
+CAT001,系统故障,技术问题,34,17
+CAT002,功能异常,技术问题,11,4
+CAT003,性能问题,技术问题,16,4
+CAT004,数据错误,技术问题,16,17
+CAT005,权限问题,技术问题,26,8
+CAT006,咨询,业务问题,24,24
+CAT007,建议,业务问题,20,11
+CAT008,投诉,业务问题,45,16
+CAT009,需求变更,业务问题,45,7
+CAT010,其他,业务问题,33,9
