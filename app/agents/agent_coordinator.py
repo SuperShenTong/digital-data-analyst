@@ -7,6 +7,49 @@ from sqlalchemy.orm import Session
 from app.models.database import AnalysisRecord, ToolCallLog
 from datetime import datetime
 import json
+import numpy as np
+import pandas as pd
+
+
+def sanitize_for_json(obj):
+    """
+    清理数据，确保可以被JSON序列化
+    处理：numpy类型, pandas对象, 布尔值, 日期时间等
+    """
+    if obj is None:
+        return None
+    if isinstance(obj, bool):
+        return obj
+    if isinstance(obj, (int, float, str)):
+        return obj
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    if isinstance(obj, (np.floating,)):
+        return float(obj)
+    if isinstance(obj, np.bool_):
+        return bool(obj)
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    if isinstance(obj, list):
+        return [sanitize_for_json(item) for item in obj]
+    if isinstance(obj, tuple):
+        return [sanitize_for_json(item) for item in obj]
+    if isinstance(obj, dict):
+        return {str(k): sanitize_for_json(v) for k, v in obj.items()}
+    if isinstance(obj, pd.DataFrame):
+        return obj.to_dict(orient='records')
+    if isinstance(obj, pd.Series):
+        return obj.tolist()
+    if hasattr(obj, 'item') and callable(getattr(obj, 'item')):
+        try:
+            return obj.item()
+        except Exception:
+            pass
+    # 对于其他类型，尝试转换为字符串
+    try:
+        return str(obj)
+    except Exception:
+        return None
 
 
 class AgentCoordinator:
@@ -72,7 +115,7 @@ class AgentCoordinator:
                 "description": understanding_result.get("description", "")
             }
             print(f"Step 2: Analysis plan: {analysis_plan}")
-            analysis_record.analysis_plan = analysis_plan
+            analysis_record.analysis_plan = sanitize_for_json(analysis_plan)
             self.db.commit()
             
             context["analysis_plan"] = analysis_plan
@@ -83,7 +126,7 @@ class AgentCoordinator:
             
             if "error" in analysis_result:
                 analysis_record.status = "failed"
-                analysis_record.final_result = {"error": analysis_result["error"]}
+                analysis_record.final_result = sanitize_for_json({"error": analysis_result["error"]})
                 self.db.commit()
                 return analysis_result
             
@@ -95,7 +138,7 @@ class AgentCoordinator:
             
             if "error" in report_result:
                 analysis_record.status = "failed"
-                analysis_record.final_result = {"error": report_result["error"]}
+                analysis_record.final_result = sanitize_for_json({"error": report_result["error"]})
                 self.db.commit()
                 return report_result
             
@@ -104,25 +147,26 @@ class AgentCoordinator:
                 tool_log = ToolCallLog(
                     analysis_record_id=analysis_record.id,
                     tool_name=tool_result["tool_name"],
-                    input_params=tool_result["parameters"],
-                    output_result=tool_result["result"],
+                    input_params=sanitize_for_json(tool_result["parameters"]),
+                    output_result=sanitize_for_json(tool_result["result"]),
                     execution_time_ms=tool_result["execution_time_ms"],
                     timestamp=datetime.now()
                 )
                 self.db.add(tool_log)
                 tool_calls.append({
                     "tool_name": tool_result["tool_name"],
-                    "input_params": tool_result["parameters"],
-                    "output_result": tool_result["result"],
+                    "input_params": sanitize_for_json(tool_result["parameters"]),
+                    "output_result": sanitize_for_json(tool_result["result"]),
                     "execution_time_ms": tool_result["execution_time_ms"]
                 })
             
-            analysis_record.tool_calls = tool_calls
-            analysis_record.final_result = {
+            analysis_record.tool_calls = sanitize_for_json(tool_calls)
+            analysis_record.final_result = sanitize_for_json({
                 "statistics": analysis_result.get("statistics"),
                 "anomalies": analysis_result.get("anomalies"),
+                "charts": analysis_result.get("charts", []),
                 "summary": analysis_result.get("summary")
-            }
+            })
             analysis_record.report_content = report_result.get("report_content", "")
             analysis_record.status = "completed"
             self.db.commit()
@@ -141,6 +185,20 @@ class AgentCoordinator:
                     "intent_category": understanding_result.get("intent_category", "")
                 })
 
+            # 关键改进：现在图表由报告生成代理使用 EnhancedChartGenerator 智能生成
+            # EnhancedChartGenerator 的流程：
+            # 1. 读取原始数据和分析结果（异常数据、统计数据）
+            # 2. 调用 LLM 分析：是否需要图表？需要什么类型的图表？
+            # 3. LLM 返回图表配置（如果需要）
+            # 4. 为 LLM 推荐的图表填充实际数据
+            # 5. 额外生成异常可视化图表（如果有异常数据）
+            # 所以优先使用报告生成代理返回的图表（更智能）
+            final_charts = report_result.get("charts", [])
+            
+            # 如果报告生成代理没有返回图表，回退到分析代理的图表
+            if not final_charts:
+                final_charts = analysis_result.get("charts", [])
+
             return {
                 "analysis_id": analysis_record.id,
                 "user_query": user_query,
@@ -151,8 +209,8 @@ class AgentCoordinator:
                 "statistics": analysis_result.get("statistics"),
                 "anomalies": analysis_result.get("anomalies"),
                 "report_content": report_result.get("report_content", ""),
-                "summary": report_result.get("summary", ""),
-                "charts": report_result.get("charts", []),
+                "summary": report_result.get("summary", analysis_result.get("summary", "")),
+                "charts": final_charts,
                 "created_at": analysis_record.created_at.isoformat(),
                 "intent": understanding_result.get("intent", ""),
                 "intent_category": understanding_result.get("intent_category", ""),

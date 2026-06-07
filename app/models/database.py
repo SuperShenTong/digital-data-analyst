@@ -3,10 +3,36 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
 import os
+import json
+
+def custom_json_serializer(obj):
+    """自定义JSON序列化器，处理特殊类型：bool, numpy数值, pandas对象等"""
+    if isinstance(obj, bool):
+        return obj
+    if hasattr(obj, 'item'):  # numpy数值类型
+        return obj.item()
+    if hasattr(obj, 'to_dict'):  # pandas对象
+        return obj.to_dict()
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    if isinstance(obj, (int, float, str, list, dict, type(None))):
+        return obj
+    try:
+        return str(obj)
+    except Exception:
+        return f"<{type(obj).__name__}>"
+
+def custom_json_dumps(obj, **kwargs):
+    """自定义JSON序列化函数"""
+    return json.dumps(obj, default=custom_json_serializer, ensure_ascii=False, **kwargs)
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./data/example_db.sqlite")
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={"check_same_thread": False},
+    json_serializer=custom_json_dumps
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

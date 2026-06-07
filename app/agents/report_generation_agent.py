@@ -1,10 +1,13 @@
 from app.agents.base_agent import BaseAgent
 from typing import Dict, Any, List, Optional
 from app.services.llm_service import LLMService
-from app.tools.chart_tools import ChartGeneratorTool
+from app.services.chart_generator import SmartChartGenerator
+from app.services.enhanced_chart_generator import EnhancedChartGenerator
+from app.services.data_service import DataService
 from app.prompts import PromptLoader
 from sqlalchemy.orm import Session
 import json
+import pandas as pd
 
 
 class ReportGenerationAgent(BaseAgent):
@@ -26,21 +29,20 @@ class ReportGenerationAgent(BaseAgent):
         super().__init__()
         self.db = db
         self.llm_service = LLMService()
-        self.chart_tool = ChartGeneratorTool(db)
+        self.chart_generator = EnhancedChartGenerator()
+        self.data_service = DataService(db)
 
     def execute(self, task: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
-        执行报告生成任务
+        执行报告生成任务 - 由LLM智能决定图表
 
-        Args:
-            task: 用户的原始问题
-            context: 包含analysis_results, analysis_plan, data_source_id等上下文
-
-        Returns:
-            包含报告内容、图表等的字典
-
-        Raises:
-            RuntimeError: 当LLM调用失败时抛出
+        核心改进：
+        1. 不是硬性规定生成什么图表，而是让LLM基于用户问题和分析结果决策
+        2. 通过 EnhancedChartGenerator，LLM会分析：
+           - 是否需要图表
+           - 需要哪些类型的图表（柱状图、折线图、饼图、散点图等）
+           - 每个图表应该展示哪些字段
+           - 图表在报告中的作用（辅助理解哪些概念）
         """
         self.log_execution(task, "in_progress")
 
@@ -50,23 +52,60 @@ class ReportGenerationAgent(BaseAgent):
             user_query = context.get("user_query", task)
             analysis_plan = context.get("analysis_plan", {}) if context else {}
 
-            # 生成图表
-            charts = self._generate_charts(data_source_id, analysis_results)
+            # ============================================================
+            # 核心改进：由LLM智能决定图表
+            # ============================================================
+            charts = []
+            try:
+                # 1. 读取原始数据（用于生成图表的实际数据）
+                df = None
+                data_source_name = ""
+                if data_source_id:
+                    df = self.data_service.load_dataframe(data_source_id)
+                    try:
+                        ds_info = self.data_service.get_data_source(data_source_id)
+                        data_source_name = ds_info.name if ds_info else ""
+                    except:
+                        data_source_name = f"数据源{data_source_id}"
 
-            # 加载提示词配置
+                # 2. 调用增强版图表生成器（内部会先问LLM："是否需要图表？需要哪些？"）
+                # 这是关键：LLM会基于用户的问题和分析结果，智能决定图表的类型和内容
+                if df is not None and len(df) > 0:
+                    charts = self.chart_generator.generate_charts(
+                        df=df,
+                        user_query=user_query,
+                        data_source_name=data_source_name,
+                        max_charts=5,
+                        analysis_results=analysis_results
+                    )
+                    print(f"[报告生成智能体] LLM决定生成 {len(charts)} 个图表")
+            except Exception as e:
+                print(f"[报告生成智能体] 图表生成失败: {e}")
+                # 图表生成失败不影响报告生成，继续执行
+
+            # ============================================================
+            # 准备报告数据（供LLM写报告时使用）
+            # ============================================================
+            report_data = {
+                "user_query": user_query,
+                "statistics": analysis_results.get("statistics", {}),
+                "anomalies": analysis_results.get("anomalies", []),
+                "charts_info": [
+                    {
+                        "title": c.get("title", ""),
+                        "type": c.get("type", ""),
+                        "purpose": c.get("x_label", "") + " vs " + c.get("y_label", "")
+                    }
+                    for c in charts
+                ]
+            }
+
+            # 加载提示词
             system_prompt = PromptLoader.get_system_prompt("report_generation_agent")
             user_template = PromptLoader.get_user_prompt_template("report_generation_agent")
 
             if not system_prompt or not user_template:
                 raise RuntimeError("无法加载报告生成Agent的提示词配置")
-
-            # 准备分析结果
-            report_data = {
-                "user_query": user_query,
-                "statistics": analysis_results.get("statistics", {}),
-                "anomalies": analysis_results.get("anomalies", []),
-                "charts_count": len(charts)
-            }
 
             # 填充用户提示词
             user_prompt = user_template.format(
@@ -75,7 +114,7 @@ class ReportGenerationAgent(BaseAgent):
                 analysis_results=json.dumps(report_data, ensure_ascii=False, indent=2)
             )
 
-            # 通过LLM生成报告
+            # 通过LLM生成报告（LLM知道有哪些图表，会在报告中合理引用）
             report_content = self.llm_service.generate_report_with_prompts(
                 system_prompt=system_prompt,
                 user_prompt=user_prompt
