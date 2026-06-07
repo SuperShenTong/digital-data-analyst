@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "digital-data-analyst"
+version = "1.0.0"
+description = "Enterprise lightweight intelligent data analysis platform based on multi-agent technology"
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["data-analysis", "ai", "agent", "llm", "analytics"]
+license = "MIT"
+authors = [
+  { name = "Your Name", email = "your@email.com" }
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Business/Enterprise",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/yourusername/digital-data-analyst"
+"Bug Tracker" = "https://github.com/yourusername/digital-data-analyst/issues"
+
+[project.scripts]
+digital-data-analyst = "main:main"
+
+[tool.setuptools.packages.find]
+where = ["app"]
+include = ["app*"]
+
+[tool.setuptools.package-data]
+"app" = ["prompts/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

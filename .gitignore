@@ -216,3 +216,47 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ====================
+# Project Specific
+# ====================
+
+# Database files
+*.sqlite
+*.db
+*.sqlite3
+data/*.sqlite
+data/*.db
+
+# Log files
+logs/
+*.log
+
+# Static files (generated charts)
+app/static/*.html
+app/static/*.png
+app/static/*.svg
+
+# Test results
+test_results/
+screenshots/
+
+# Demo/test scripts output
+*.csv
+*.xlsx
+sales_test_report.txt
+
+# Environment files
+.env.local
+.env.*.local
+
+# OS files
+Thumbs.db
+.DS_Store
+._*
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.Python

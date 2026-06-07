@@ -140,9 +140,17 @@ python main.py
 │   └── static/             # 静态资源
 ├── frontend/               # 前端代码
 │   └── index.html          # 主页面
-├── data/                   # 数据目录
+├── data/                   # 数据目录（示例数据文件）
 ├── docs/                   # 文档目录
-├── tests/                  # 测试用例
+│   ├── agent_design.md          # Agent智能体设计文档
+│   ├── tool_calling_schema.md   # Tool Calling工具调用Schema文档
+│   ├── technical_design.md      # 系统技术设计文档
+│   ├── deployment_guide.md      # 项目部署说明文档
+│   ├── deliverables.md          # 项目交付物清单
+│   ├── sample_report.md         # 系统自动生成的分析报告样例
+│   ├── iteration_history.md     # 功能迭代记录
+│   └── demo_materials.md        # 项目演示材料
+├── test_results/           # 测试结果（截图和日志）
 ├── .env                    # 环境变量配置
 ├── requirements.txt        # 依赖列表
 ├── main.py                 # 启动文件
