@@ -50,23 +50,15 @@ pip install -r requirements.txt
 创建 `.env` 文件：
 
 ```env
-# 大模型配置
-OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_API_BASE=https://api.openai.com/v1
-
-# 阿里云通义千问配置（可选）
-QIANWEN_API_KEY=your_qianwen_api_key_here
-DASHSCOPE_API_KEY=your_dashscope_key_here
-
-# 应用配置
-DATA_DIR=data
-STATIC_DIR=app/static
-LOG_DIR=logs
-DATABASE_URL=sqlite:///./data/example_db.sqlite
-DEBUG=true
+# 大模型配置（阿里云通义千问）
+LLM_API_KEY=your_api_key_here
+LLM_API_BASE=https://dashscope.aliyuncs.com/compatible-mode/v1
+LLM_MODEL=qwen-plus
+LLM_TEMPERATURE=0.1
+LLM_PROVIDER=aliyun
 ```
 
-> **注意**: 请将 `your_openai_api_key_here` 替换为您的实际API密钥
+> **注意**: 请将 `your_api_key_here` 替换为您的实际API密钥
 
 ## 4. 启动服务
 
@@ -87,11 +79,10 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 ### 4.3 使用启动脚本
 
 ```bash
-# Windows
+# Windows PowerShell
+.\start.ps1
+# 或双击
 start.bat
-
-# Linux/Mac
-bash start.sh
 ```
 
 ## 5. 访问系统

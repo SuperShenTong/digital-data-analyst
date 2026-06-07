@@ -117,43 +117,54 @@ python main.py
 ```
 ├── app/                    # 应用主目录
 │   ├── agents/             # 智能体模块
-│   │   ├── base_agent.py           # Agent基类
-│   │   ├── data_understanding_agent.py  # 数据理解Agent
-│   │   ├── data_analysis_agent.py      # 数据分析Agent
-│   │   ├── report_generation_agent.py  # 报告生成Agent
-│   │   └── agent_coordinator.py        # 智能体协调器
+│   │   ├── base_agent.py              # Agent基类
+│   │   ├── data_understanding_agent.py   # 数据理解Agent
+│   │   ├── data_analysis_agent.py         # 数据分析Agent
+│   │   ├── report_generation_agent.py     # 报告生成Agent
+│   │   └── agent_coordinator.py           # 智能体协调器
 │   ├── tools/              # 工具调用模块
-│   │   ├── base_tool.py             # Tool基类
-│   │   ├── data_tools.py            # 数据工具
-│   │   ├── anomaly_tools.py         # 异常检测工具
-│   │   ├── chart_tools.py           # 图表生成工具
-│   │   └── report_tools.py          # 报告生成工具
+│   │   ├── base_tool.py              # Tool基类
+│   │   ├── data_tools.py             # 数据工具
+│   │   ├── anomaly_tools.py          # 异常检测工具
+│   │   ├── chart_tools.py            # 图表生成工具
+│   │   └── report_tools.py           # 报告生成工具
 │   ├── services/           # 业务服务
-│   │   └── data_service.py          # 数据服务
+│   │   ├── data_service.py            # 数据服务
+│   │   ├── llm_service.py             # LLM服务
+│   │   ├── chart_generator.py         # 图表生成器
+│   │   ├── enhanced_chart_generator.py # 增强图表生成器
+│   │   ├── llm_chart_selector.py      # LLM图表选择器
+│   │   ├── context_service.py         # 上下文服务
+│   │   └── observability_service.py   # 可观测性服务
+│   ├── prompts/            # AI Prompt配置
+│   │   ├── data_understanding_agent_prompt.yaml  # 数据理解Prompt
+│   │   ├── data_analysis_agent_prompt.yaml       # 数据分析Prompt
+│   │   └── report_generation_agent_prompt.yaml   # 报告生成Prompt
 │   ├── api/                # API接口
-│   │   └── router.py                # 路由定义
+│   │   └── router.py                  # 路由定义
 │   ├── models/             # 数据模型
-│   │   ├── database.py              # 数据库模型
-│   │   └── schemas.py               # Pydantic schemas
-│   ├── utils/              # 工具函数
-│   │   └── logger.py                # 日志工具
-│   └── static/             # 静态资源
-├── frontend/               # 前端代码
-│   └── index.html          # 主页面
-├── data/                   # 数据目录（示例数据文件）
-├── docs/                   # 文档目录
+│   │   ├── database.py                # 数据库模型
+│   │   └── schemas.py                 # Pydantic schemas
+│   └── utils/              # 工具函数
+│       └── logger.py                  # 日志工具
+├── docs/                   # 项目文档
 │   ├── agent_design.md          # Agent智能体设计文档
-│   ├── tool_calling_schema.md   # Tool Calling工具调用Schema文档
+│   ├── tool_calling_schema.md   # Tool Calling Schema文档
 │   ├── technical_design.md      # 系统技术设计文档
 │   ├── deployment_guide.md      # 项目部署说明文档
-│   ├── deliverables.md          # 项目交付物清单
-│   ├── sample_report.md         # 系统自动生成的分析报告样例
-│   ├── iteration_history.md     # 功能迭代记录
-│   └── demo_materials.md        # 项目演示材料
-├── test_results/           # 测试结果（截图和日志）
+│   ├── deliverables.md         # 项目交付物清单
+│   ├── sample_report.md        # 分析报告样例
+│   ├── iteration_history.md    # 功能迭代记录
+│   └── demo_materials.md       # 项目演示材料
+├── frontend/               # 前端代码
+│   └── index.html          # 主页面
 ├── .env                    # 环境变量配置
+├── .gitignore              # Git忽略配置
+├── pyproject.toml          # Python项目配置
 ├── requirements.txt        # 依赖列表
 ├── main.py                 # 启动文件
+├── start.bat               # Windows启动脚本
+├── start.ps1               # PowerShell启动脚本
 └── README.md               # 项目说明
 ```
 

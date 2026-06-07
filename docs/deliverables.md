@@ -6,17 +6,17 @@
 |------|------------|----------|------|
 | 1 | 项目代码仓库（完整源码） | `/` | ✅ |
 | 2 | 可运行 Demo 程序 | `main.py`, `frontend/index.html` | ✅ |
-| 3 | 项目部署说明文档 | `docs/项目部署说明文档.md` | ✅ |
-| 4 | 系统技术设计文档 | `docs/技术设计文档.md` | ✅ |
-| 5 | Agent 智能体设计文档 | `docs/Agent智能体设计文档.md` | ✅ |
-| 6 | Tool Calling 工具调用 Schema 文档 | `docs/Tool_Calling工具调用Schema文档.md` | ✅ |
+| 3 | 项目部署说明文档 | `docs/deployment_guide.md` | ✅ |
+| 4 | 系统技术设计文档 | `docs/technical_design.md` | ✅ |
+| 5 | Agent 智能体设计文档 | `docs/agent_design.md` | ✅ |
+| 6 | Tool Calling 工具调用 Schema 文档 | `docs/tool_calling_schema.md` | ✅ |
 | 7 | AI Prompt 及智能体全套配置文件 | `app/prompts/` | ✅ |
 | 8 | 项目示例数据文件 | `data/` | ✅ |
 | 9 | 系统自动生成的分析图表成果 | `app/static/` | ✅ |
-| 10 | 系统自动生成的完整分析报告 | `docs/示例分析报告.md` | ✅ |
+| 10 | 系统自动生成的完整分析报告 | `docs/sample_report.md` | ✅ |
 | 11 | Agent 执行日志样例 | `test_results/test_log_*.txt` | ✅ |
-| 12 | 功能迭代记录 | `docs/功能迭代记录.md` | ✅ |
-| 13 | 项目演示材料 | `docs/项目演示材料.md` | ✅ |
+| 12 | 功能迭代记录 | `docs/iteration_history.md` | ✅ |
+| 13 | 项目演示材料 | `docs/demo_materials.md` | ✅ |
 
 ---
 
@@ -47,21 +47,24 @@ digital-data-analyst_v1/
 │   │   ├── llm_chart_selector.py     # LLM图表选择器
 │   │   ├── llm_service.py            # LLM服务
 │   │   └── observability_service.py  # 可观测性服务
-│   ├── api/                # API接口
-│   │   └── router.py                 # 路由定义
-│   ├── models/             # 数据模型
-│   │   ├── database.py               # 数据库模型
-│   │   └── schemas.py                # Pydantic schemas
 │   ├── prompts/            # 提示词配置
+│   │   ├── data_understanding_agent_prompt.yaml
+│   │   ├── data_analysis_agent_prompt.yaml
+│   │   └── report_generation_agent_prompt.yaml
+│   ├── api/                # API接口
+│   ├── models/             # 数据模型
 │   ├── utils/              # 工具函数
 │   └── static/             # 静态资源（生成的图表）
+├── docs/                   # 文档目录
 ├── frontend/               # 前端代码
 │   └── index.html          # 主页面
-├── data/                   # 数据目录
-├── docs/                   # 文档目录
-├── test_results/           # 测试结果
-├── main.py                 # 启动文件
+├── .env                    # 环境变量配置
+├── .gitignore              # Git忽略配置
+├── pyproject.toml          # Python项目配置
 ├── requirements.txt        # 依赖列表
+├── main.py                 # 启动文件
+├── start.bat               # Windows启动脚本
+├── start.ps1               # PowerShell启动脚本
 └── README.md               # 项目说明
 ```
 
@@ -108,7 +111,7 @@ http://localhost:8000
 
 ## 3️⃣ 项目部署说明文档
 
-**文件**: `docs/项目部署说明文档.md`
+**文件**: `docs/deployment_guide.md`
 
 ### 文档内容
 
@@ -125,25 +128,25 @@ http://localhost:8000
 
 ## 4️⃣ 系统技术设计文档
 
-**文件**: `docs/技术设计文档.md`
+**文件**: `docs/technical_design.md`
 
 ### 文档内容
 
 | 章节 | 内容 |
 |------|------|
 | 系统概述 | 架构介绍 |
-| 架构设计 | 整体架构图 |
-| 核心模块设计 | 智能体/工具/数据模型 |
+| 架构设计 | 整体架构图 + 图表生成流程 |
+| 核心模块设计 | 智能体/工具/服务/数据模型 |
 | API接口设计 | 接口清单 |
 | 部署与运行 | 环境依赖 |
-| 安全性考虑 | 安全措施 |
+| AI Prompt配置 | Prompt文件结构 |
 | 扩展性设计 | 扩展方案 |
 
 ---
 
 ## 5️⃣ Agent 智能体设计文档
 
-**文件**: `docs/Agent智能体设计文档.md`
+**文件**: `docs/agent_design.md`
 
 ### 文档内容
 
@@ -161,7 +164,7 @@ http://localhost:8000
 
 ## 6️⃣ Tool Calling 工具调用 Schema 文档
 
-**文件**: `docs/Tool_Calling工具调用Schema文档.md`
+**文件**: `docs/tool_calling_schema.md`
 
 ### 文档内容
 
@@ -225,7 +228,7 @@ http://localhost:8000
 
 ## 🔟 系统自动生成的完整分析报告
 
-**文件**: `docs/示例分析报告.md`
+**文件**: `docs/sample_report.md`
 
 ### 报告内容结构
 
@@ -268,7 +271,7 @@ http://localhost:8000
 
 ## 1️⃣2️⃣ 功能迭代记录
 
-**待创建**: `docs/功能迭代记录.md`
+**文件**: `docs/iteration_history.md`
 
 ### 迭代计划
 
@@ -285,7 +288,7 @@ http://localhost:8000
 
 ## 1️⃣3️⃣ 项目演示材料
 
-**待创建**: `docs/项目演示材料.md`
+**文件**: `docs/demo_materials.md`
 
 ### 演示内容
 
